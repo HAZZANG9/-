@@ -32,7 +32,6 @@
             background-color: #f8fafc;
             color: #0f172a;
         }
-        /* Custom smooth scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -66,7 +65,7 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
     
-    <!-- Top Header -->
+    <!-- Main Top Header -->
     <header class="flex flex-col md:flex-row md:items-center justify-between pb-5 border-b border-slate-200 gap-4">
         <div>
             <div class="flex items-center gap-3">
@@ -76,7 +75,7 @@
                 <div>
                     <h1 class="text-2xl font-black tracking-tight text-slate-900">매출 찬스 발굴 경합사 분석 대시보드</h1>
                     <p class="text-xs sm:text-sm text-slate-500 font-medium">
-                        주간 현장 비교 진단을 통해 우리 매장에 즉시 적용할 <strong>핵심 매출 기회(Chance Spot)</strong>를 포착합니다.
+                        현장 주간 조사와 1~5점 간단 평가로 즉시 적용 가능한 <strong>핵심 매출 기회(Chance Spot)</strong>를 분석합니다.
                     </p>
                 </div>
             </div>
@@ -101,238 +100,111 @@
     <!-- Toast Notification Container -->
     <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- SECTION 1: Store & Competitor Setup -->
+    <!-- SECTION: Store & Competitor Setup -->
     <section class="mt-6 print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
         <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
             <div class="flex items-center gap-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-                <h2 class="text-sm sm:text-base font-bold text-slate-800 uppercase tracking-wide">1. 매장 및 경합사 기본 정보 설정</h2>
+                <h2 class="text-sm sm:text-base font-bold text-slate-800 uppercase tracking-wide">매장 및 경합사 기본 정보 설정</h2>
             </div>
-            <span class="text-xs text-slate-400 font-mono" id="lastSavedTime">자동 저장됨</span>
+            <div class="flex items-center gap-3">
+                <button onclick="addCompetitorStore()" class="no-print px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition flex items-center gap-1">
+                    <i class="fa-solid fa-plus text-[10px]"></i>
+                    <span>경합사 추가</span>
+                </button>
+                <span class="text-xs text-slate-400 font-mono" id="lastSavedTime">자동 저장됨</span>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
-                <label class="block text-xs font-bold text-blue-900 mb-1 flex items-center gap-1">
-                    <i class="fa-solid fa-store text-blue-600"></i> 우리 매장명
-                </label>
-                <input type="text" id="myStoreName" value="강북 직영 1호점" oninput="updateStoreNames()"
-                    class="w-full bg-white border border-blue-200 rounded-lg px-3 py-2 text-sm text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+        <!-- Stores Container (Our Store + Addable Competitors) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="storeConfigGrid">
+            <!-- Dynamically populated store cards -->
+        </div>
+    </section>
+
+    <!-- SECTION: Weekly Observation & Survey Rating (MAIN TOP PRIORITY) -->
+    <section class="mt-6 print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pb-3 border-b border-slate-100 gap-2">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                <h2 class="text-sm sm:text-base font-bold text-slate-800 uppercase tracking-wide">주간 현장 관찰 기록 및 설문 평가</h2>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-500">조사 주차:</span>
+                <input type="week" id="surveyWeek" onchange="saveToLocalStorage()"
+                    class="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1 text-xs text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </div>
+
+        <!-- Category Selector Tabs -->
+        <div class="flex flex-wrap gap-2 mb-5 no-print border-b border-slate-100 pb-3" id="categoryTabButtons">
+            <!-- Rendered by JS -->
+        </div>
+
+        <!-- Current Category Rating & Observation Area -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5">
+            <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
+                <div class="flex items-center gap-2">
+                    <i id="currentCatIcon" class="fa-solid fa-tags text-blue-600 text-lg"></i>
+                    <h3 class="text-sm sm:text-base font-extrabold text-slate-900" id="currentCategoryTitle">프로모션 / 가격 경쟁력</h3>
+                </div>
+                <span class="text-xs text-slate-500 font-medium">각 매장별 현황을 1~5점으로 클릭해 평가하세요.</span>
             </div>
 
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
-                    <i class="fa-solid fa-building text-slate-500"></i> 경합사 A (주경합)
-                </label>
-                <input type="text" id="compNameA" value="A 브랜드 (역삼점)" oninput="updateStoreNames()"
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Our Store Card -->
-            <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between mb-3">
-                        <label class="text-xs font-bold text-blue-900 flex items-center gap-1.5">
-                            <i class="fa-solid fa-store text-blue-600"></i> 우리 매장 기본 정보
-                        </label>
-                        <span class="text-[11px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">기준 점포</span>
+            <!-- Store-by-Store Observation & Rating Cards -->
+            <div class="space-y-4" id="storeObservationList">
+                <!-- Dynamically Rendered Store Evaluation Blocks -->
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION: Sales Opportunity Highlight Banner -->
+    <section class="mt-6 print-card bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-2xl p-0.5 shadow-lg shadow-orange-500/10">
+        <div class="bg-white rounded-[15px] p-5 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-100">
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-amber-500 text-white font-extrabold text-lg shadow-md shadow-amber-500/30">
+                        <i class="fa-solid fa-lightbulb"></i>
+                    </span>
+                    <div>
+                        <span class="text-xs font-bold text-amber-700 uppercase tracking-wider">주간 분석 결과 리포트</span>
+                        <h2 class="text-base sm:text-lg font-black text-slate-900">🔥 이번 주 핵심 매출 찬스 (Chance Spot Summary)</h2>
                     </div>
-                    <input type="text" id="myStoreName" placeholder="예: 강북 직영 1호점" oninput="updateStoreNames()"
-                        class="w-full bg-white border border-blue-200 rounded-lg px-3 py-2 text-sm text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 transition mb-3">
-                    
-                    <!-- Detail Spec Inputs -->
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 mb-1">영업면적</label>
-                            <input type="text" id="myStoreArea" placeholder="예: 45평" onchange="saveToLocalStorage()"
-                                class="w-full bg-white border border-slate-200 rounded-md px-2.5 py-1.5 text-slate-800">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 mb-1">전월실적</label>
-                            <input type="text" id="myStoreSales" placeholder="예: 6,500만원" onchange="saveToLocalStorage()"
-                                class="w-full bg-white border border-slate-200 rounded-md px-2.5 py-1.5 text-slate-800">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 mb-1">주 타겟 고객층</label>
-                            <input type="text" id="myStoreTarget" placeholder="예: 2030 직장인, 인근 주민" onchange="saveToLocalStorage()"
-                                class="w-full bg-white border border-slate-200 rounded-md px-2.5 py-1.5 text-slate-800">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 mb-1">매장 주요 특징</label>
-                            <input type="text" id="myStoreFeature" placeholder="예: 역세권 대로변, 주차 불가능" onchange="saveToLocalStorage()"
-                                class="w-full bg-white border border-slate-200 rounded-md px-2.5 py-1.5 text-slate-800">
-                        </div>
-                    </div>
+                </div>
+                <div id="topOpportunityBadge" class="self-start sm:self-auto px-3 py-1 text-xs font-extrabold rounded-full bg-amber-100 text-amber-900 border border-amber-300">
+                    분석 진행 중...
                 </div>
             </div>
 
-            <!-- Dynamic Competitors Container -->
-            <div id="competitorCardsContainer" class="contents">
+            <!-- Dynamic Opportunity Grid Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4" id="heroOpportunityGrid">
                 <!-- Dynamically populated via JS -->
             </div>
         </div>
     </section>
 
-    <!-- SECTION 3: All-in-One Multi-Category Overview Graphs -->
+    <!-- SECTION: Visual Chart Comparison -->
     <section class="mt-6 print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-5 pb-3 border-b border-slate-100 gap-2">
             <div class="flex items-center gap-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-                <h2 class="text-sm sm:text-base font-bold text-slate-800 uppercase tracking-wide">3. 영역별 한눈에 보는 경쟁력 시각 비교 그래프</h2>
+                <h2 class="text-sm sm:text-base font-bold text-slate-800 uppercase tracking-wide">영역별 경쟁력 시각 비교 그래프</h2>
             </div>
-            <div class="flex items-center gap-4 text-xs font-bold text-slate-600">
-                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-blue-600 inline-block"></span><span class="displayMyName">우리 매장</span></span>
-                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-slate-400 inline-block"></span><span class="displayCompAName">경합사 A</span></span>
-                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-amber-500 inline-block"></span><span class="displayCompBName">경합사 B</span></span>
-            </div>
+            <p class="text-xs text-slate-500">상단 1~5점 평가에 따라 그래프가 실시간으로 변동합니다.</p>
         </div>
 
-        <!-- 4-Category Multi Chart Grid -->
+        <!-- Multi Chart Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="multiCategoryChartGrid">
             <!-- Dynamically Rendered Category Comparison Charts -->
         </div>
     </section>
 
-    <!-- SECTION 4: Interactive Score Adjuster & Weekly Observation Logs -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
-        
-        <!-- Left Column: Interactive Score Adjuster -->
-        <div class="lg:col-span-6">
-            <section class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm h-full flex flex-col justify-between">
-                <div>
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pb-3 border-b border-slate-100 gap-2">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-                            <h2 class="text-sm sm:text-base font-bold text-slate-800 uppercase tracking-wide">4. 영역별 세부 점수 실시간 조율</h2>
-                        </div>
-                        
-                        <!-- Category Switcher Buttons -->
-                        <div class="flex flex-wrap gap-1 no-print">
-                    <div class="space-y-4">
-                        <!-- Dynamic Survey Score Sections -->
-                        <div id="surveyCategoriesContainer" class="space-y-4">
-                            <!-- Dynamically generated survey blocks with 1-5 rating buttons -->
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-4">
-                        <div class="flex items-center justify-between text-xs font-bold text-slate-700">
-                            <span>실시간 점수 평가 (5점 만점 기준)</span>
-                            <span id="currentCategoryTitle" class="text-blue-700 font-extrabold text-sm">가격 경쟁력 / 프로모션</span>
-                        </div>
-
-                        <!-- Our Store Slider -->
-                        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-2xs">
-                            <div class="flex justify-between text-xs mb-1.5">
-                                <span class="text-blue-900 font-bold flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-blue-600"></span>
-                                    <span class="displayMyName">우리 매장</span>
-                                </span>
-                                <span class="font-mono text-blue-700 font-extrabold text-sm" id="scoreMyText">4.2 점</span>
-                            </div>
-                            <input type="range" min="1" max="5" step="0.1" id="sliderMy" oninput="handleScoreChange()"
-                                class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
-                        </div>
-
-                        <!-- Comp A Slider -->
-                        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-2xs">
-                            <div class="flex justify-between text-xs mb-1.5">
-                                <span class="text-slate-700 font-semibold flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-                                    <span class="displayCompAName">경합사 A</span>
-                                </span>
-                                <span class="font-mono text-slate-700 font-extrabold text-sm" id="scoreCompAText">3.5 점</span>
-                            </div>
-                            <input type="range" min="1" max="5" step="0.1" id="sliderCompA" oninput="handleScoreChange()"
-                                class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-500">
-                        </div>
-
-                        <!-- Comp B Slider -->
-                        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-2xs">
-                            <div class="flex justify-between text-xs mb-1.5">
-                                <span class="text-slate-700 font-semibold flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                                    <span class="displayCompBName">경합사 B</span>
-                                </span>
-                                <span class="font-mono text-amber-600 font-extrabold text-sm" id="scoreCompBText">4.8 점</span>
-                            </div>
-                            <input type="range" min="1" max="5" step="0.1" id="sliderCompB" oninput="handleScoreChange()"
-                                class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-500">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 flex items-center gap-1.5">
-                    <i class="fa-solid fa-circle-info text-blue-500"></i>
-                    <span>슬라이더를 조율하면 상단 종합 시각 그래프 및 제안점이 실시간 자동 업데이트됩니다.</span>
-                </div>
-            </section>
-        </div>
-
-        <!-- Right Column: Weekly Observation Logs -->
-        <div class="lg:col-span-6">
-            <section class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm h-full flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-                            <h2 class="text-sm sm:text-base font-bold text-slate-800 uppercase tracking-wide">5. 주간 현장 관찰 기록</h2>
-                        </div>
-                        <span class="text-xs text-slate-400 font-medium">현장 스케치</span>
-                    </div>
-
-                    <div class="space-y-3.5">
-                        <!-- Comp A Log -->
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
-                                <span class="flex items-center gap-1.5">
-                                    <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
-                                    <span class="displayCompAName">경합사 A</span> 주요 동향
-                                </span>
-                            </label>
-                            <textarea id="obsCompA" rows="2" onchange="saveToLocalStorage()"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition resize-none"
-                                placeholder="예: 주말 한정 1+1 타임세일 전개. 매장 입구 대형 POP 설치로 시선 집중 유도 중."></textarea>
-                        </div>
-
-                        <!-- Comp B Log -->
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
-                                <span class="flex items-center gap-1.5">
-                                    <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
-                                    <span class="displayCompBName">경합사 B</span> 주요 동향
-                                </span>
-                            </label>
-                            <textarea id="obsCompB" rows="2" onchange="saveToLocalStorage()"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition resize-none"
-                                placeholder="예: 신규 시그니처 패키지 상품 출시. SNS 연계 쿠폰 발급으로 대기 고객 증가."></textarea>
-                        </div>
-
-                        <!-- Our Store Gap Analysis -->
-                        <div>
-                            <label class="block text-xs font-bold text-red-600 mb-1 flex items-center gap-1.5">
-                                <i class="fa-solid fa-triangle-exclamation"></i>
-                                <span>우리 매장 취약점 & 시급 개선 사항</span>
-                            </label>
-                            <textarea id="obsMyGap" rows="2" onchange="saveToLocalStorage()"
-                                class="w-full bg-red-50/40 border border-red-200 rounded-xl p-2.5 text-xs text-slate-800 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-400 focus:bg-white transition resize-none"
-                                placeholder="예: 피크타임(12시~14시) 결제 대기 시간 증가로 일부 고객 이탈 발생. 매장 전면 메인 진열대 시시각성 개선 필요."></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 flex items-center gap-1.5">
-                    <i class="fa-solid fa-circle-check text-emerald-500"></i>
-                    <span>현장 기록은 하단 매장 실행 리포트(Action Plan) 수립의 근거 데이터가 됩니다.</span>
-                </div>
-            </section>
-        </div>
-    </div>
-
-    <!-- SECTION 5: Action Plan & Final Report Section -->
+    <!-- SECTION: Action Plan & Final Report Section -->
     <section class="mt-6 print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
         <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
             <div class="flex items-center gap-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-                <h2 class="text-sm sm:text-base font-bold text-slate-800 uppercase tracking-wide">6. 우리 매장 적용 실행 리포트 (Action Plan)</h2>
+                <h2 class="text-sm sm:text-base font-bold text-slate-800 uppercase tracking-wide">우리 매장 적용 실행 리포트 (Action Plan)</h2>
             </div>
             <button onclick="addActionRow()" class="no-print px-3.5 py-1.5 text-xs font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-1.5 shadow-sm">
                 <i class="fa-solid fa-plus"></i>
@@ -392,147 +264,654 @@
 </div>
 
 <script>
+    /* ==========================================================================
+       Application State & Storage Logic
+       ========================================================================== */
     const CATEGORIES = {
-        price: { title: "가격 경쟁력 / 프로모션", icon: "fa-tags" },
-        display: { title: "VMD / 상품 진열 수준", icon: "fa-store" },
-        service: { title: "고객 응대 / 서비스 품질", icon: "fa-heart" }
+        price: {
+            title: "프로모션 / 가격 경쟁력",
+            icon: "fa-tags",
+            insights: [
+                "경합사가 단가 할인 우위를 지속하는 경우, 직접 인하 대신 <strong>'인기 상품 연계 사은품'</strong> 찬스 전개 권장.",
+                "구매 금액별 차등 쿠폰(3만/5만원) 지급으로 객단가 증대 효과 유도 가능."
+            ]
+        },
+        display: {
+            title: "VMD / 상품 진열 수준",
+            icon: "fa-store",
+            insights: [
+                "메인 진열대 시시각성 우수 매장을 벤치마킹하여 당사 입구 전면 <strong>조명 보강 및 주력 상품 전진 배치</strong> 시급.",
+                "고객 동선 내 연관 연출물(POP) 보강을 통한 교차 구매 유도 기회 확장."
+            ]
+        },
+        service: {
+            title: "고객 응대 / 서비스 품질",
+            icon: "fa-heart",
+            insights: [
+                "친절 응대 소문내기 이벤트 및 <strong>단골 전용 혜택 강화</strong>를 통한 재방문 고정고객화 어필.",
+                "피크타임 대기 동선 케어 서비스 강화를 통한 고객 이탈 방지."
+            ]
+        },
+        traffic: {
+            title: "집객력 / 유동인구 흡수",
+            icon: "fa-users",
+            insights: [
+                "매장 외부 스탠딩 입간판 설치 및 <strong>타임 세일 전용 안내판</strong>으로 유입 전환율 향상 제안.",
+                "유동 인구 집중 시간대 입구 비주얼 연출물 교체로 시선 유도."
+            ]
+        }
     };
 
-    let competitors = [
-        { id: 'comp_1', name: '', area: '', sales: '', target: '', feature: '' }
+    let stores = [
+        { id: 'myStore', name: '', isMine: true, area: '', sales: '', target: '', feature: '' },
+        { id: 'comp1', name: '', isMine: false, area: '', sales: '', target: '', feature: '' },
+        { id: 'comp2', name: '', isMine: false, area: '', sales: '', target: '', feature: '' }
     ];
 
-    let storeScores = {
-        my: { price: 3, display: 3, service: 3 },
-        comp_1: { price: 3, display: 3, service: 3 }
+    // Scores structured by storeId and categoryKey
+    // e.g. { myStore: { price: 4, display: 3, ... }, comp1: { price: 3, ... } }
+    let ratings = {
+        myStore: { price: 4, display: 3, service: 5, traffic: 3 },
+        comp1: { price: 3, display: 5, service: 3, traffic: 4 },
+        comp2: { price: 5, display: 3, service: 4, traffic: 4 }
     };
 
-    function renderCompetitorInputs() {
-        const container = document.getElementById('competitorCardsContainer');
+    // Observations structured by storeId, categoryKey, with text and photo URL
+    let observations = {
+        myStore: { price: { text: "", photo: "" }, display: { text: "", photo: "" }, service: { text: "", photo: "" }, traffic: { text: "", photo: "" } },
+        comp1: { price: { text: "", photo: "" }, display: { text: "", photo: "" }, service: { text: "", photo: "" }, traffic: { text: "", photo: "" } },
+        comp2: { price: { text: "", photo: "" }, display: { text: "", photo: "" }, service: { text: "", photo: "" }, traffic: { text: "", photo: "" } }
+    };
+
+    let activeCategory = 'price';
+
+    let actionItems = [
+        {
+            idea: "매장 전면 주력 세트 상품 POP 교체 및 조명 보강",
+            effect: "객단가 상승 (약 5~10%)",
+            owner: "김매니저",
+            dueDate: getFormattedDate(7),
+            status: "진행중"
+        }
+    ];
+
+    window.addEventListener('DOMContentLoaded', () => {
+        // Set default week
+        const today = new Date();
+        const year = today.getFullYear();
+        const week = Math.ceil((((today - new Date(year, 0, 1)) / 86400000) + 1) / 7);
+        document.getElementById('surveyWeek').value = `${year}-W${week < 10 ? '0' + week : week}`;
+
+        loadFromLocalStorage();
+        renderStoreConfigGrid();
+        renderCategoryTabs();
+        renderObservationSection();
+        renderMultiCategoryCharts();
+        renderHeroOpportunities();
+        renderActionTable();
+    });
+
+    function getFormattedDate(daysFromNow) {
+        const d = new Date();
+        d.setDate(d.getDate() + daysFromNow);
+        return d.toISOString().split('T')[0];
+    }
+
+    function renderStoreConfigGrid() {
+        const grid = document.getElementById('storeConfigGrid');
+        grid.innerHTML = '';
+
+        stores.forEach((store, idx) => {
+            const card = document.createElement('div');
+            card.className = `p-4 rounded-xl border ${store.isMine ? 'bg-blue-50/40 border-blue-200' : 'bg-slate-50 border-slate-200'} relative transition`;
+            
+            card.innerHTML = `
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold ${store.isMine ? 'text-blue-900 bg-blue-100 px-2.5 py-0.5 rounded-full' : 'text-slate-700 bg-slate-200 px-2 py-0.5 rounded-full'}">
+                        ${store.isMine ? '우리 매장' : `경합사 ${String.fromCharCode(64 + idx)}`}
+                    </span>
+                    ${!store.isMine && stores.filter(s => !s.isMine).length > 1 ? `
+                        <button onclick="removeCompetitorStore('${store.id}')" class="text-slate-400 hover:text-red-500 text-xs no-print">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    ` : ''}
+                </div>
+
+                <div class="space-y-2.5">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">매장명</label>
+                        <input type="text" value="${escapeHtml(store.name)}" placeholder="${store.isMine ? '예: 강북 1호점' : `예: 경합사 ${String.fromCharCode(64 + idx)} (역삼점)`}"
+                            onchange="updateStoreInfo('${store.id}', 'name', this.value)"
+                            class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">영업면적</label>
+                            <input type="text" value="${escapeHtml(store.area)}" placeholder="예: 35평"
+                                onchange="updateStoreInfo('${store.id}', 'area', this.value)"
+                                class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">전월실적</label>
+                            <input type="text" value="${escapeHtml(store.sales)}" placeholder="예: 8,500만원"
+                                onchange="updateStoreInfo('${store.id}', 'sales', this.value)"
+                                class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">주객층</label>
+                        <input type="text" value="${escapeHtml(store.target)}" placeholder="예: 2030 직장인, 주말 가족 단위"
+                            onchange="updateStoreInfo('${store.id}', 'target', this.value)"
+                            class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">매장 주요 특징</label>
+                        <input type="text" value="${escapeHtml(store.feature)}" placeholder="예: 오피스 밀집 지역, 전면 통유리 구조"
+                            onchange="updateStoreInfo('${store.id}', 'feature', this.value)"
+                            class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function addCompetitorStore() {
+        const newId = 'comp_' + Date.now();
+        stores.push({ id: newId, name: '', isMine: false, area: '', sales: '', target: '', feature: '' });
+        
+        // Initialize ratings and observations for new store
+        ratings[newId] = { price: 3, display: 3, service: 3, traffic: 3 };
+        observations[newId] = { price: { text: "", photo: "" }, display: { text: "", photo: "" }, service: { text: "", photo: "" }, traffic: { text: "", photo: "" } };
+
+        renderStoreConfigGrid();
+        renderObservationSection();
+        renderMultiCategoryCharts();
+        renderHeroOpportunities();
+        saveToLocalStorage();
+        showToast("새 경합사가 추가되었습니다.");
+    }
+
+    function removeCompetitorStore(storeId) {
+        stores = stores.filter(s => s.id !== storeId);
+        delete ratings[storeId];
+        delete observations[storeId];
+
+        renderStoreConfigGrid();
+        renderObservationSection();
+        renderMultiCategoryCharts();
+        renderHeroOpportunities();
+        saveToLocalStorage();
+        showToast("경합사가 삭제되었습니다.");
+    }
+
+    function updateStoreInfo(storeId, field, value) {
+        const store = stores.find(s => s.id === storeId);
+        if (store) {
+            store[field] = value;
+            renderObservationSection();
+            renderMultiCategoryCharts();
+            renderHeroOpportunities();
+            saveToLocalStorage();
+        }
+    }
+
+    function renderCategoryTabs() {
+        const container = document.getElementById('categoryTabButtons');
         container.innerHTML = '';
 
-        competitors.forEach((comp, idx) => {
+        Object.keys(CATEGORIES).forEach(key => {
+            const cat = CATEGORIES[key];
+            const isActive = key === activeCategory;
+            const btn = document.createElement('button');
+            btn.className = `px-3 py-1.5 text-xs font-bold rounded-xl transition flex items-center gap-1.5 ${
+                isActive 
+                ? 'bg-blue-600 text-white shadow-sm' 
+                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+            }`;
+            btn.onclick = () => switchCategory(key);
+            btn.innerHTML = `<i class="fa-solid ${cat.icon}"></i> <span>${cat.title}</span>`;
+            container.appendChild(btn);
+        });
+    }
+
+    function switchCategory(key) {
+        activeCategory = key;
+        renderCategoryTabs();
+        
+        const cat = CATEGORIES[key];
+        document.getElementById('currentCategoryTitle').innerText = cat.title;
+        document.getElementById('currentCatIcon').className = `fa-solid ${cat.icon} text-blue-600 text-lg`;
+
+        renderObservationSection();
+    }
+
+    function renderObservationSection() {
+        const container = document.getElementById('storeObservationList');
+        container.innerHTML = '';
+
+        stores.forEach((store) => {
+            const currentScore = (ratings[store.id] && ratings[store.id][activeCategory]) || 3;
+            const currentObs = (observations[store.id] && observations[store.id][activeCategory]) || { text: "", photo: "" };
+
             const card = document.createElement('div');
-            card.className = "bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-between relative";
+            card.className = `bg-white p-3.5 sm:p-4 rounded-xl border ${store.isMine ? 'border-blue-300 ring-1 ring-blue-100' : 'border-slate-200'} space-y-3`;
+
+            // 1 to 5 Buttons markup
+            let scoreButtonsHtml = '<div class="flex items-center gap-1 sm:gap-1.5">';
+            for (let score = 1; score <= 5; score++) {
+                const isSelected = score === currentScore;
+                scoreButtonsHtml += `
+                    <button type="button" onclick="setRating('${store.id}', '${activeCategory}', ${score})"
+                        class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg font-black text-xs transition border ${
+                            isSelected 
+                            ? (store.isMine ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-amber-500 text-white border-amber-500 shadow-sm')
+                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-200'
+                        }">
+                        ${score}점
+                    </button>
+                `;
+            }
+            scoreButtonsHtml += '</div>';
+
             card.innerHTML = `
-                <div>
-                    <div class="flex items-center justify-between mb-3">
-                        <label class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                            <i class="fa-solid fa-building text-slate-500"></i> 경합사 ${idx + 1} 정보
-                        </label>
-                        ${competitors.length > 1 ? `
-                            <button onclick="removeCompetitor('${comp.id}')" class="text-xs text-red-500 hover:text-red-700 font-bold flex items-center gap-1">
-                                <i class="fa-solid fa-trash-can"></i> 삭제
-                            </button>
-                        ` : ''}
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-black ${store.isMine ? 'text-blue-700' : 'text-slate-800'}">
+                            ${escapeHtml(store.name) || (store.isMine ? '우리 매장' : '경합사')}
+                        </span>
+                        ${store.isMine ? '<span class="text-[10px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-bold">당사</span>' : ''}
                     </div>
-                    <input type="text" id="name_${comp.id}" value="${escapeHtml(comp.name)}" placeholder="예: A 브랜드 역삼점" oninput="updateCompData('${comp.id}', 'name', this.value)"
-                        class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-slate-400 transition mb-3">
-                    
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 mb-1">영업면적</label>
-                            <input type="text" value="${escapeHtml(comp.area)}" placeholder="예: 40평" onchange="updateCompData('${comp.id}', 'area', this.value)"
-                                class="w-full bg-white border border-slate-200 rounded-md px-2.5 py-1.5 text-slate-800">
+
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-500 font-bold">평가 점수:</span>
+                        ${scoreButtonsHtml}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
+                    <div class="md:col-span-8">
+                        <textarea rows="2" placeholder="${store.isMine ? '우리 매장의 현황, 강약점 및 개선 관찰 사항 작성' : '경합사의 주요 연출, 행사 내용, 고객 반응 등 관찰 내용 작성'}"
+                            onchange="updateObservationText('${store.id}', '${activeCategory}', this.value)"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition resize-none">${escapeHtml(currentObs.text)}</textarea>
+                    </div>
+
+                    <div class="md:col-span-4 flex flex-col gap-1">
+                        <div class="flex items-center justify-between">
+                            <label class="text-[11px] font-bold text-slate-600 flex items-center gap-1">
+                                <i class="fa-solid fa-camera text-slate-400"></i> 현장 사진
+                            </label>
+                            ${currentObs.photo ? `
+                                <button onclick="removePhoto('${store.id}', '${activeCategory}')" class="text-[10px] text-red-500 hover:underline">사진 삭제</button>
+                            ` : ''}
                         </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 mb-1">전월실적</label>
-                            <input type="text" value="${escapeHtml(comp.sales)}" placeholder="예: 5,000만원" onchange="updateCompData('${comp.id}', 'sales', this.value)"
-                                class="w-full bg-white border border-slate-200 rounded-md px-2.5 py-1.5 text-slate-800">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 mb-1">주 타겟 고객층</label>
-                            <input type="text" value="${escapeHtml(comp.target)}" placeholder="예: 3040 직장인" onchange="updateCompData('${comp.id}', 'target', this.value)"
-                                class="w-full bg-white border border-slate-200 rounded-md px-2.5 py-1.5 text-slate-800">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 mb-1">매장 주요 특징</label>
-                            <input type="text" value="${escapeHtml(comp.feature)}" placeholder="예: 모던한 인테리어, 행사 위주 영업" onchange="updateCompData('${comp.id}', 'feature', this.value)"
-                                class="w-full bg-white border border-slate-200 rounded-md px-2.5 py-1.5 text-slate-800">
-                        </div>
+                        
+                        ${currentObs.photo ? `
+                            <div class="relative w-full h-16 rounded-lg overflow-hidden border border-slate-200 group">
+                                <img src="${currentObs.photo}" class="w-full h-full object-cover">
+                            </div>
+                        ` : `
+                            <label class="w-full h-16 border-2 border-dashed border-slate-200 hover:border-blue-400 rounded-lg flex flex-col items-center justify-center cursor-pointer bg-slate-50 hover:bg-blue-50/30 transition text-slate-400 text-xs">
+                                <i class="fa-solid fa-image text-sm mb-0.5"></i>
+                                <span class="text-[10px]">사진 첨부</span>
+                                <input type="file" accept="image/*" class="hidden" onchange="handlePhotoUpload('${store.id}', '${activeCategory}', event)">
+                            </label>
+                        `}
                     </div>
                 </div>
             `;
             container.appendChild(card);
         });
-
-        renderSurveyRatingBlocks();
-        renderMultiCategoryCharts();
-        renderHeroOpportunities();
     }
 
-    /* Survey style 1 to 5 Rating selector */
-    function renderSurveyRatingBlocks() {
-        const container = document.getElementById('surveyCategoriesContainer');
-        if (!container) return;
+    function setRating(storeId, catKey, score) {
+        if (!ratings[storeId]) ratings[storeId] = {};
+        ratings[storeId][catKey] = score;
+
+        renderObservationSection();
+        renderMultiCategoryCharts();
+        renderHeroOpportunities();
+        saveToLocalStorage();
+    }
+
+    function updateObservationText(storeId, catKey, text) {
+        if (!observations[storeId]) observations[storeId] = {};
+        if (!observations[storeId][catKey]) observations[storeId][catKey] = { text: "", photo: "" };
+        observations[storeId][catKey].text = text;
+        saveToLocalStorage();
+    }
+
+    function handlePhotoUpload(storeId, catKey, event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (!observations[storeId]) observations[storeId] = {};
+            if (!observations[storeId][catKey]) observations[storeId][catKey] = { text: "", photo: "" };
+            observations[storeId][catKey].photo = e.target.result;
+            
+            renderObservationSection();
+            saveToLocalStorage();
+            showToast("현장 사진이 등록되었습니다.");
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removePhoto(storeId, catKey) {
+        if (observations[storeId] && observations[storeId][catKey]) {
+            observations[storeId][catKey].photo = "";
+            renderObservationSection();
+            saveToLocalStorage();
+            showToast("사진이 삭제되었습니다.");
+        }
+    }
+
+    function renderMultiCategoryCharts() {
+        const container = document.getElementById('multiCategoryChartGrid');
         container.innerHTML = '';
 
-        const myName = document.getElementById('myStoreName').value || '우리 매장';
+        const myStore = stores.find(s => s.isMine) || stores[0];
+        const compStores = stores.filter(s => !s.isMine);
 
         Object.keys(CATEGORIES).forEach(catKey => {
             const cat = CATEGORIES[catKey];
-            const block = document.createElement('div');
-            block.className = "bg-white p-3.5 rounded-xl border border-slate-200 space-y-3";
+            const myScore = (ratings[myStore.id] && ratings[myStore.id][catKey]) || 3;
 
-            let ratingsHtml = `
-                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-                    <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                        <i class="fa-solid ${cat.icon} text-blue-600"></i> ${cat.title}
-                    </span>
-                    <span class="text-[11px] text-slate-400 font-semibold">1점(매우미흡) ~ 5점(매우우수)</span>
-                </div>
+            // Find highest competitor score
+            let maxCompScore = 0;
+            compStores.forEach(cs => {
+                const sc = (ratings[cs.id] && ratings[cs.id][catKey]) || 3;
+                if (sc > maxCompScore) maxCompScore = sc;
+            });
 
-                <!-- Rating for Our Store -->
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-blue-50/40 p-2.5 rounded-lg border border-blue-100">
-                    <span class="text-xs font-bold text-blue-900 flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-blue-600"></span>
-                        <span>${escapeHtml(myName)}</span>
-                    </span>
-                    <div class="flex items-center gap-1">
-                        ${[1, 2, 3, 4, 5].map(score => `
-                            <button type="button" onclick="setScore('my', '${catKey}', ${score})"
-                                class="w-8 h-8 rounded-lg font-bold text-xs transition border ${
-                                    (storeScores.my && storeScores.my[catKey] === score)
-                                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm scale-105'
-                                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
-                                }">
-                                ${score}
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
+            const isWinning = myScore >= maxCompScore;
+            const diff = (myScore - maxCompScore).toFixed(1);
 
-            // Ratings for Competitors
-            competitors.forEach((comp) => {
-                const cName = comp.name || `경합사`;
-                const currentVal = storeScores[comp.id] ? storeScores[comp.id][catKey] : 3;
+            let barsHtml = '';
+            stores.forEach(store => {
+                const sc = (ratings[store.id] && ratings[store.id][catKey]) || 3;
+                const pct = Math.round((sc / 5) * 100);
+                const isMine = store.isMine;
 
-                ratingsHtml += `
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                        <span class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-                            <span>${escapeHtml(cName)}</span>
-                        </span>
-                        <div class="flex items-center gap-1">
-                            ${[1, 2, 3, 4, 5].map(score => `
-                                <button type="button" onclick="setScore('${comp.id}', '${catKey}', ${score})"
-                                    class="w-8 h-8 rounded-lg font-bold text-xs transition border ${
-                                        (currentVal === score)
-                                        ? 'bg-slate-800 text-white border-slate-800 shadow-sm scale-105'
-                                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
-                                    }">
-                                    ${score}
-                                </button>
-                            `).join('')}
+                barsHtml += `
+                    <div>
+                        <div class="flex justify-between text-xs mb-1 font-semibold">
+                            <span class="${isMine ? 'text-blue-900 font-bold' : 'text-slate-600'}">
+                                ${escapeHtml(store.name) || (isMine ? '우리 매장' : '경합사')}
+                            </span>
+                            <span class="font-mono ${isMine ? 'text-blue-700 font-black' : 'text-slate-600'}">${sc} 점</span>
+                        </div>
+                        <div class="h-3 w-full bg-slate-200 rounded-full overflow-hidden p-0.5">
+                            <div class="h-full ${isMine ? 'bg-blue-600' : 'bg-slate-400'} rounded-full transition-all duration-300" style="width: ${pct}%;"></div>
                         </div>
                     </div>
                 `;
             });
 
-            block.innerHTML = ratingsHtml;
-            container.appendChild(block);
+            const cardHtml = `
+                <div onclick="switchCategory('${catKey}')" class="cursor-pointer border ${catKey === activeCategory ? 'border-blue-500 ring-2 ring-blue-500/20 bg-blue-50/20' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-100/60'} rounded-xl p-4 transition shadow-2xs">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid ${cat.icon} ${catKey === activeCategory ? 'text-blue-600' : 'text-slate-500'} text-sm"></i>
+                            <span class="font-bold text-xs sm:text-sm text-slate-900">${cat.title}</span>
+                        </div>
+                        ${isWinning 
+                            ? `<span class="px-2 py-0.5 text-[11px] font-extrabold rounded bg-emerald-100 text-emerald-700 border border-emerald-200">우위 (+${diff}점)</span>`
+                            : `<span class="px-2 py-0.5 text-[11px] font-extrabold rounded bg-amber-100 text-amber-800 border border-amber-300">찬스 발견 (${diff}점)</span>`
+                        }
+                    </div>
+
+                    <div class="space-y-2.5">
+                        ${barsHtml}
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', cardHtml);
         });
     }
 
-    function setScore(targetId, catKey, score) {
+    function renderHeroOpportunities() {
+        const grid = document.getElementById('heroOpportunityGrid');
+        grid.innerHTML = '';
+
+        const myStore = stores.find(s => s.isMine) || stores[0];
+        const compStores = stores.filter(s => !s.isMine);
+
+        let maxGap = -999;
+        let topCatKey = 'price';
+
+        Object.keys(CATEGORIES).forEach(catKey => {
+            const myScore = (ratings[myStore.id] && ratings[myStore.id][catKey]) || 3;
+            let maxComp = 0;
+            compStores.forEach(cs => {
+                const sc = (ratings[cs.id] && ratings[cs.id][catKey]) || 3;
+                if (sc > maxComp) maxComp = sc;
+            });
+            const gap = maxComp - myScore;
+            if (gap > maxGap) {
+                maxGap = gap;
+                topCatKey = catKey;
+            }
+        });
+
+        const topBadge = document.getElementById('topOpportunityBadge');
+        if (maxGap > 0) {
+            topBadge.className = "self-start sm:self-auto px-3 py-1 text-xs font-extrabold rounded-full bg-amber-100 text-amber-900 border border-amber-300 animate-pulse";
+            topBadge.innerText = `🚨 집중 역전 기회: ${CATEGORIES[topCatKey].title} (+${maxGap}점 찬스)`;
+        } else {
+            topBadge.className = "self-start sm:self-auto px-3 py-1 text-xs font-extrabold rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300";
+            topBadge.innerText = `✨ 우리 매장 전반적 우위 유지 중 (강점 어필 필요)`;
+        }
+
+        Object.keys(CATEGORIES).forEach(catKey => {
+            const cat = CATEGORIES[catKey];
+            const myScore = (ratings[myStore.id] && ratings[myStore.id][catKey]) || 3;
+            let maxComp = 0;
+            compStores.forEach(cs => {
+                const sc = (ratings[cs.id] && ratings[cs.id][catKey]) || 3;
+                if (sc > maxComp) maxComp = sc;
+            });
+
+            const gap = maxComp - myScore;
+            const isTopSpot = (catKey === topCatKey && maxGap > 0);
+
+            const card = document.createElement('div');
+            card.className = `p-4 rounded-xl border ${isTopSpot ? 'bg-amber-50/80 border-amber-300 ring-2 ring-amber-400/30' : 'bg-slate-50 border-slate-200'} transition`;
+            
+            let insightContent = "";
+            if (myScore < maxComp) {
+                insightContent = `<span class="text-amber-900 font-bold">【경합 1위 대비 -${gap}점 열세】</span> ${cat.insights[0]}`;
+            } else {
+                insightContent = `<span class="text-blue-900 font-bold">【당 매장 +${Math.abs(gap)}점 우수】</span> ${cat.insights[0]}`;
+            }
+
+            card.innerHTML = `
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-black uppercase text-slate-900 flex items-center gap-1.5">
+                        <i class="fa-solid ${cat.icon} ${isTopSpot ? 'text-amber-600' : 'text-blue-600'}"></i>
+                        ${cat.title}
+                    </span>
+                    ${isTopSpot ? '<span class="text-[10px] font-black bg-amber-500 text-white px-2 py-0.5 rounded-full">최대 매출 찬스</span>' : ''}
+                </div>
+                <p class="text-xs text-slate-700 font-medium leading-relaxed">
+                    ${insightContent}
+                </p>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function renderActionTable() {
+        const tbody = document.getElementById('actionTableBody');
+        tbody.innerHTML = '';
+
+        actionItems.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50 transition animate-fade-in";
+            tr.innerHTML = `
+                <td class="py-2.5 px-3">
+                    <input type="text" value="${escapeHtml(item.idea)}" onchange="updateActionItem(${index}, 'idea', this.value)" placeholder="실행 아이디어 입력"
+                        class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 font-medium focus:outline-none focus:border-blue-500">
+                </td>
+                <td class="py-2.5 px-3">
+                    <select onchange="updateActionItem(${index}, 'effect', this.value)"
+                        class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs text-slate-800 font-medium focus:outline-none focus:border-blue-500">
+                        <option ${item.effect.includes('객단가') ? 'selected' : ''}>객단가 상승 (약 5~10%)</option>
+                        <option ${item.effect.includes('신규') ? 'selected' : ''}>신규 고객 유입 증가</option>
+                        <option ${item.effect.includes('주말') ? 'selected' : ''}>주말 방문율 제고</option>
+                        <option ${item.effect.includes('재방문') ? 'selected' : ''}>재방문 고정고객화</option>
+                    </select>
+                </td>
+                <td class="py-2.5 px-3">
+                    <input type="text" value="${escapeHtml(item.owner)}" onchange="updateActionItem(${index}, 'owner', this.value)" placeholder="담당자"
+                        class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs text-slate-900 font-medium focus:outline-none focus:border-blue-500">
+                </td>
+                <td class="py-2.5 px-3">
+                    <input type="date" value="${item.dueDate}" onchange="updateActionItem(${index}, 'dueDate', this.value)"
+                        class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs text-slate-900 font-medium focus:outline-none focus:border-blue-500">
+                </td>
+                <td class="py-2.5 px-3">
+                    <select onchange="updateActionItem(${index}, 'status', this.value)"
+                        class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-bold focus:outline-none ${
+                            item.status === '완료' ? 'text-emerald-600' : item.status === '진행중' ? 'text-amber-600' : 'text-slate-500'
+                        }">
+                        <option value="대기" ${item.status === '대기' ? 'selected' : ''}>대기</option>
+                        <option value="진행중" ${item.status === '진행중' ? 'selected' : ''}>진행중</option>
+                        <option value="완료" ${item.status === '완료' ? 'selected' : ''}>완료</option>
+                    </select>
+                </td>
+                <td class="py-2.5 px-3 text-center no-print">
+                    <button onclick="removeActionRow(${index})" class="text-slate-400 hover:text-red-500 transition p-1">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        saveToLocalStorage();
+    }
+
+    function addActionRow() {
+        actionItems.push({
+            idea: "",
+            effect: "신규 고객 유입 증가",
+            owner: "",
+            dueDate: getFormattedDate(7),
+            status: "대기"
+        });
+        renderActionTable();
+        showToast("새 실행 항목이 추가되었습니다.");
+    }
+
+    function removeActionRow(index) {
+        actionItems.splice(index, 1);
+        renderActionTable();
+        showToast("항목이 삭제되었습니다.");
+    }
+
+    function updateActionItem(index, key, value) {
+        actionItems[index][key] = value;
+        saveToLocalStorage();
+    }
+
+    function saveToLocalStorage() {
+        const data = {
+            stores: stores,
+            ratings: ratings,
+            observations: observations,
+            surveyWeek: document.getElementById('surveyWeek').value,
+            finalSummary: document.getElementById('finalSummary').value,
+            actionItems: actionItems
+        };
+        localStorage.setItem('competitor_dashboard_v3', JSON.stringify(data));
+        
+        const now = new Date();
+        document.getElementById('lastSavedTime').innerText = `자동저장: ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    }
+
+    function loadFromLocalStorage() {
+        const saved = localStorage.getItem('competitor_dashboard_v3');
+        if (!saved) return;
+        try {
+            const data = JSON.parse(saved);
+            if (data.stores) stores = data.stores;
+            if (data.ratings) ratings = data.ratings;
+            if (data.observations) observations = data.observations;
+            if (data.surveyWeek) document.getElementById('surveyWeek').value = data.surveyWeek;
+            if (data.finalSummary) document.getElementById('finalSummary').value = data.finalSummary;
+            if (data.actionItems) actionItems = data.actionItems;
+        } catch (e) {
+            console.error("Failed to load state", e);
+        }
+    }
+
+    function resetDashboardData() {
+        if (confirm("모든 입력 데이터를 초기화하시겠습니까?")) {
+            localStorage.removeItem('competitor_dashboard_v3');
+            location.reload();
+        }
+    }
+
+    function saveAllReport() {
+        saveToLocalStorage();
+        showToast("리포트가 성공적으로 저장 및 확정되었습니다!");
+    }
+
+    function copySummaryToClipboard() {
+        const myStore = stores.find(s => s.isMine) || stores[0];
+        const week = document.getElementById('surveyWeek').value;
+        const summary = document.getElementById('finalSummary').value;
+
+        let text = `[${myStore.name || '우리 매장'} - ${week} 경합사 분석 요약]\n\n`;
+        text += `■ 핵심 실행 항목 (Action Plan):\n`;
+        actionItems.forEach((item, i) => {
+            text += `${i+1}. ${item.idea} (담당: ${item.owner}, 완료목표: ${item.dueDate})\n`;
+        });
+        text += `\n■ 점장 총평 및 요청사항:\n${summary || '내용 없음'}`;
+
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+
+        showToast("요약 텍스트가 클립보드에 복사되었습니다!");
+    }
+
+    function exportJSON() {
+        saveToLocalStorage();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(localStorage.getItem('competitor_dashboard_v3'));
+        const dlAnchor = document.createElement('a');
+        dlAnchor.setAttribute("href", dataStr);
+        dlAnchor.setAttribute("download", `경합사분석_${document.getElementById('surveyWeek').value || 'report'}.json`);
+        document.body.appendChild(dlAnchor);
+        dlAnchor.click();
+        dlAnchor.remove();
+        showToast("데이터 백업 파일이 다운로드되었습니다.");
+    }
+
+    function showToast(msg) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = "bg-slate-900 text-white font-bold text-xs px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 animate-fade-in pointer-events-auto border border-slate-700";
+        toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <span>${escapeHtml(msg)}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.3s';
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
+    }
+
+    function escapeHtml(str) {
+        return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+</script>
+</body>
+</html>
